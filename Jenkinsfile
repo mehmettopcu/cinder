@@ -19,7 +19,7 @@ pipeline {
 
   agent {
     node {
-      label 'python'
+      label 'maven'
     }
   }
    
