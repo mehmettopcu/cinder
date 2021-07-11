@@ -1,0 +1,53 @@
+pipeline {
+
+ environment {
+    //registry = "10.34.100.113/skyatlas/gotestcicd"
+    //registryCredential = 'a2535b63-dab4-411a-94a3-5a6bc308d3e6'
+    
+    // the address of your Docker Hub registry
+    REGISTRY = '10.34.100.113/skyatlas'
+    // your Docker Hub username
+    // Docker image name
+    APP_NAME = 'cinder'
+    // ‘dockerhubid’ is the credentials ID you created in KubeSphere with Docker Hub Access Token
+    DOCKERHUB_CREDENTIAL = credentials('a2535b63-dab4-411a-94a3-5a6bc308d3e6')
+    // the kubeconfig credentials ID you created in KubeSphere
+    KUBECONFIG_CREDENTIAL_ID = '75184fa5-32dc-48f0-95be-846e58b48882'
+    // the name of the project you created in KubeSphere, not the DevOps project name
+    PROJECT_NAME = 'cinder'
+  }
+
+  agent {
+    node {
+      label 'maven'
+    }
+  }
+   
+  stages {
+    stage('harbor login') {
+      steps{
+        container ('maven') {
+          sh 'echo $DOCKERHUB_CREDENTIAL_PSW  | docker login -u $DOCKERHUB_CREDENTIAL_USR --password-stdin $REGISTRY'
+            }
+          }  
+        }
+    stage('build & push') {
+      steps {
+        container ('maven') {
+          sh 'git clone https://github.com/mehmettopcu/cinder.git'
+          sh 'cd gotestcicd && docker build -t $REGISTRY/$APP_NAME:latest .'
+          sh 'docker push $REGISTRY/$APP_NAME'
+          }
+        }
+      }
+
+    stage ('deploy app') {
+      steps {
+        container('maven') {
+          kubernetesDeploy(configs: 'gotestcicd/deployment.yml', kubeconfigId: "$KUBECONFIG_CREDENTIAL_ID")
+          }
+        }
+      }
+
+  }
+}
