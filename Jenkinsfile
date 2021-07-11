@@ -34,20 +34,20 @@ pipeline {
     stage('build & push') {
       steps {
         container ('maven') {
-          sh 'git clone https://github.com/mehmettopcu/cinder.git'
-          sh 'cd gotestcicd && docker build -t $REGISTRY/$APP_NAME:latest .'
+          sh 'git clone https://github.com/mehmettopcu/loci.git'
+          sh 'cd loci && docker build --build-arg PROJECT=cinder -t $REGISTRY/$APP_NAME:latest .'
           sh 'docker push $REGISTRY/$APP_NAME'
           }
         }
       }
 
-    stage ('deploy app') {
-      steps {
-        container('maven') {
-          kubernetesDeploy(configs: 'gotestcicd/deployment.yml', kubeconfigId: "$KUBECONFIG_CREDENTIAL_ID")
-          }
-        }
-      }
+   // stage ('deploy app') {
+   //   steps {
+   //     container('maven') {
+   //       kubernetesDeploy(configs: 'gotestcicd/deployment.yml', kubeconfigId: "$KUBECONFIG_CREDENTIAL_ID")
+   //       }
+   //     }
+   //   }
 
   }
 }
