@@ -35,7 +35,7 @@ pipeline {
       steps {
         container ('maven') {
           sh 'git clone https://github.com/mehmettopcu/loci.git'
-          sh 'cd loci && docker build --build-arg PROJECT=cinder -t $REGISTRY/$APP_NAME:latest .'
+          sh 'cd loci && docker build --build-arg PROJECT=cinder --build-arg PROFILES="cinder lvm ceph qemu" -t $REGISTRY/$APP_NAME:latest .'
           sh 'docker push $REGISTRY/$APP_NAME'
           }
         }
